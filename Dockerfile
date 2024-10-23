@@ -38,6 +38,7 @@ RUN echo "CHECKING HADOOP FILES..." \
         if [ -z "$file" ]; then \
             echo -e "\n\n🚨 ERROR: ${app^} file (.tar.gz) was not found. Please download the required files by running '\''sh download.sh'\''.\n\n" >&2; \
             exit 1; \
+        fi \
     done; \
 '
 
