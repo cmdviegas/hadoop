@@ -42,7 +42,7 @@ COPY . .
 RUN echo "CHECKING HADOOP FILES..." \
     && HADOOP_FILE=$(ls hadoop-*.tar.gz 2>/dev/null) && \
     if [ -z "$HADOOP_FILE" ]; then \
-        echo "\n\n🚨 ERROR: Hadoop file not found. Please download the required files by running download.sh"; \
+        echo "🚨 ERROR: Hadoop file not found. Please download the required files by running download.sh"; \
         exit 1; \
     else \
         echo "EXTRACTING FILES... ${HADOOP_FILE}" \
