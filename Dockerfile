@@ -30,6 +30,17 @@ ENV PASSWORD "${PASS}"
 
 # Update system and install required packages
 
+RUN echo "CHECKING HADOOP FILES..." \
+    && bash -c ' \
+    # Check if the mandatory files are present and process them
+    for app in hadoop; do \
+        file=$(ls ${app}*.tar.gz 2>/dev/null); \
+        if [ -z "$file" ]; then \
+            echo -e "\n\n🚨 ERROR: ${app^} file (.tar.gz) was not found. Please download the required files by running '\''sh download.sh'\''.\n\n" >&2; \
+            exit 1; \
+    done; \
+'
+
 # Local mirror
 #RUN sed -i -e 's/http:\/\/archive\.ubuntu\.com\/ubuntu\//mirror:\/\/mirrors\.ubuntu\.com\/mirrors\.txt/' /etc/apt/sources.list
 
@@ -75,19 +86,7 @@ RUN echo "SETTING PERMISSIONS..." \
 
 # Extract Hadoop to the container filesystem
 RUN echo "EXTRACTING FILES..." \
-    && bash -c ' \
-    # Check if the mandatory files are present and process them
-    for app in hadoop; do \
-        file=$(ls ${app}*.tar.gz 2>/dev/null); \
-        if [ -z "$file" ]; then \
-            echo -e "\n\n🚨 ERROR: ${app^} file (.tar.gz) was not found. Please download the required files by running '\''sh download.sh'\''.\n\n" >&2; \
-            exit 1; \
-        else \
-            # Extract the file
-            tar -xzf "$file" -C ${MYDIR} && rm -rf ${file}; \
-        fi; \
-    done; \
-'
+    && tar -xzf "$file" -C ${MYDIR} && rm -rf ${file}
 
 RUN ln -sf ${MYDIR}/hadoop-3*/ ${HADOOP_HOME}
 
