@@ -28,19 +28,22 @@ ARG PASS
 ENV USERNAME "${USER}"
 ENV PASSWORD "${PASS}"
 
-# Update system and install required packages
+# Set working dir
+ENV MYDIR /home/${USERNAME}
+WORKDIR ${MYDIR}
+
+# Configure Hadoop enviroment variables
+ENV HADOOP_HOME "${MYDIR}/hadoop"
+
+# Copy all files from local folder to container, except the ones in .dockerignore
+COPY . .
 
 RUN echo "CHECKING HADOOP FILES..." \
-    && bash -c ' \
-    # Check if the mandatory files are present and process them
-    for app in hadoop; do \
-        file=$(ls ${app}*.tar.gz 2>/dev/null); \
-        if [ -z "$file" ]; then \
-            echo -e "\n\n🚨 ERROR: ${app^} file (.tar.gz) was not found. Please download the required files by running '\''sh download.sh'\''.\n\n" >&2; \
-            exit 1; \
-        fi \
-    done; \
-'
+    && HADOOP_FILE=$(ls hadoop-*.tar.gz 2>/dev/null) && \
+    if [ -z "$HADOOP_FILE" ]; then \
+        echo "\n\n🚨 ERROR: Hadoop not found. Please download the required files by running download.sh"; \
+        exit 1; \
+    fi
 
 # Local mirror
 #RUN sed -i -e 's/http:\/\/archive\.ubuntu\.com\/ubuntu\//mirror:\/\/mirrors\.ubuntu\.com\/mirrors\.txt/' /etc/apt/sources.list
@@ -48,6 +51,7 @@ RUN echo "CHECKING HADOOP FILES..." \
 # BR Mirror
 RUN sed --in-place --regexp-extended "s/(\/\/)(archive\.ubuntu)/\1br.\2/" /etc/apt/sources.list
 
+# Update system and install required packages
 RUN echo "RUNNING APT UPDATE..." \
     && apt-get update -qq 
 RUN echo "RUNNING APT-GET TO INSTALL REQUIRED RESOURCES..." \ 
@@ -71,23 +75,13 @@ RUN usermod -aG sudo ${USERNAME}
 RUN echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${USERNAME}
 USER ${USERNAME}
 
-# Set working dir
-ENV MYDIR /home/${USERNAME}
-WORKDIR ${MYDIR}
-
-# Configure Hadoop enviroment variables
-ENV HADOOP_HOME "${MYDIR}/hadoop"
-
-# Copy all files from local folder to container, except the ones in .dockerignore
-COPY . .
-
 # Set permissions to user folder
 RUN echo "SETTING PERMISSIONS..." \
     && sudo -S chown "${USERNAME}:${USERNAME}" -R ${MYDIR}
 
 # Extract Hadoop to the container filesystem
 RUN echo "EXTRACTING FILES..." \
-    && tar -xzf "$file" -C ${MYDIR} && rm -rf ${file}
+    && tar -xzf "${HADOOP_FILE}" -C ${MYDIR} && rm -rf $hadoop_file
 
 RUN ln -sf ${MYDIR}/hadoop-3*/ ${HADOOP_HOME}
 
