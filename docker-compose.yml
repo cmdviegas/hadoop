@@ -7,7 +7,7 @@
 # DEPARTAMENTO DE ENGENHARIA DE COMPUTACAO E AUTOMACAO
 # UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE, NATAL/RN
 #
-# (C) 2024 CARLOS M D VIEGAS
+# (C) 2022-2025 CARLOS M D VIEGAS
 # https://github.com/cmdviegas
 
 ### Description:
@@ -37,10 +37,11 @@ services:
       - "8088:8088/tcp" # YARN
       - "2222:22/tcp" # SSH
     volumes: 
-      - ./apps:/home/${SYS_USERNAME}/apps
+      - ./myfiles:/home/${SYS_USERNAME}/myfiles
       - .env:/home/${SYS_USERNAME}/.env
       - node-master:/home/${SYS_USERNAME}/
     entrypoint: ./bootstrap.sh
+    command: MASTER
     healthcheck:
       test: bash -c 'ssh -q -o ConnectTimeout=1 ${SYS_USERNAME}@node-master exit'
       start_period: 3s
@@ -55,16 +56,15 @@ services:
       replicas: ${NODE_REPLICAS}
     tty: true
     restart: on-failure:2
-    ports:
-      - "8042-8062:8042/tcp" # YARN
     networks:
       - hadoop_network
     depends_on:
       node-master:
         condition: service_healthy
     entrypoint: ./bootstrap.sh
+    command: WORKER
     volumes: 
-      - ./apps:/home/${SYS_USERNAME}/apps
+      - ./myfiles:/home/${SYS_USERNAME}/myfiles
       - .env:/home/${SYS_USERNAME}/.env
       - /home/${SYS_USERNAME}/
 
