@@ -38,12 +38,19 @@ ENV HADOOP_HOME "${MYDIR}/hadoop"
 # Copy all files from local folder to container, except the ones in .dockerignore
 COPY . .
 
+# Extract Hadoop to the container filesystem
 RUN echo "CHECKING HADOOP FILES..." \
     && HADOOP_FILE=$(ls hadoop-*.tar.gz 2>/dev/null) && \
     if [ -z "$HADOOP_FILE" ]; then \
-        echo "\n\n🚨 ERROR: Hadoop not found. Please download the required files by running download.sh"; \
+        echo "\n\n🚨 ERROR: Hadoop file not found. Please download the required files by running download.sh"; \
         exit 1; \
+    else \
+        echo "EXTRACTING FILES... ${HADOOP_FILE}" \
+        && tar -xzf "${HADOOP_FILE}" -C "${MYDIR}" \
+        && rm -f "${HADOOP_FILE}"; \
     fi
+
+RUN ln -sf ${MYDIR}/hadoop-3*/ ${HADOOP_HOME}
 
 # Local mirror
 #RUN sed -i -e 's/http:\/\/archive\.ubuntu\.com\/ubuntu\//mirror:\/\/mirrors\.ubuntu\.com\/mirrors\.txt/' /etc/apt/sources.list
@@ -78,12 +85,6 @@ USER ${USERNAME}
 # Set permissions to user folder
 RUN echo "SETTING PERMISSIONS..." \
     && sudo -S chown "${USERNAME}:${USERNAME}" -R ${MYDIR}
-
-# Extract Hadoop to the container filesystem
-RUN echo "EXTRACTING FILES..." \
-    && tar -xzf "${HADOOP_FILE}" -C ${MYDIR} && rm -rf $hadoop_file
-
-RUN ln -sf ${MYDIR}/hadoop-3*/ ${HADOOP_HOME}
 
 # Optional (convert charset from UTF-16 to UTF-8)
 RUN dos2unix config_files/*
