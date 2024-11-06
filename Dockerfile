@@ -25,32 +25,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Get username and password from build arguments
 ARG USER
 ARG PASS
-ENV USERNAME "${USER}"
-ENV PASSWORD "${PASS}"
-
-# Set working dir
-ENV MYDIR /home/${USERNAME}
-WORKDIR ${MYDIR}
-
-# Configure Hadoop enviroment variables
-ENV HADOOP_HOME "${MYDIR}/hadoop"
-
-# Copy all files from local folder to container, except the ones in .dockerignore
-COPY . .
-
-# Extract Hadoop to the container filesystem
-RUN echo "CHECKING HADOOP FILES..." \
-    && HADOOP_FILE=$(ls hadoop-*.tar.gz 2>/dev/null) && \
-    if [ -z "$HADOOP_FILE" ]; then \
-        echo "🚨 ERROR: Hadoop file not found. Please download the required files by running download.sh"; \
-        exit 1; \
-    else \
-        echo "EXTRACTING FILES... ${HADOOP_FILE}" \
-        && tar -xzf "${HADOOP_FILE}" -C "${MYDIR}" \
-        && rm -f "${HADOOP_FILE}"; \
-    fi
-
-RUN ln -sf ${MYDIR}/hadoop-3*/ ${HADOOP_HOME}
+ENV USERNAME="${USER}"
+ENV PASSWORD="${PASS}"
 
 # Local mirror
 #RUN sed -i -e 's/http:\/\/archive\.ubuntu\.com\/ubuntu\//mirror:\/\/mirrors\.ubuntu\.com\/mirrors\.txt/' /etc/apt/sources.list
@@ -64,7 +40,7 @@ RUN echo "RUNNING APT UPDATE..." \
 RUN echo "RUNNING APT-GET TO INSTALL REQUIRED RESOURCES..." \ 
     && DEBIAN_FRONTEND=noninteractive DEBCONF_NOWARNINGS=yes \
     apt-get install -qq --no-install-recommends \
-    sudo vim nano dos2unix ssh wget openjdk-11-jdk-headless \
+    sudo vim nano dos2unix ssh wget aria2 openjdk-11-jdk-headless \
     python3.10-minimal python3-pip iproute2 iputils-ping net-tools < /dev/null > /dev/null
 
 # Clear apt cache and lists to reduce size
@@ -82,9 +58,30 @@ RUN usermod -aG sudo ${USERNAME}
 RUN echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${USERNAME}
 USER ${USERNAME}
 
+# Set working dir
+ENV MYDIR="/home/${USERNAME}"
+WORKDIR ${MYDIR}
+
+# Configure Hadoop enviroment variables
+ENV HADOOP_HOME="${MYDIR}/hadoop"
+
+# Copy all files from local folder to container, except the ones in .dockerignore
+COPY . .
+
 # Set permissions to user folder
 RUN echo "SETTING PERMISSIONS..." \
     && sudo -S chown "${USERNAME}:${USERNAME}" -R ${MYDIR}
+
+# Extract Hadoop to the container filesystem
+ARG HADOOP_VER
+ENV HADOOP_VERSION=${HADOOP_VER}
+
+RUN if [ ! -f ${MYDIR}/hadoop-${HADOOP_VERSION}.tar.gz ]; then \
+    aria2c -x 16 --check-certificate=false --allow-overwrite=false \
+    https://dlcdn.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
+    fi
+RUN tar -zxf hadoop-${HADOOP_VERSION}.tar.gz -C ${MYDIR} && rm -rf hadoop-${HADOOP_VERSION}.tar.gz
+RUN ln -sf ${MYDIR}/hadoop-3* ${HADOOP_HOME}
 
 # Optional (convert charset from UTF-16 to UTF-8)
 RUN dos2unix config_files/*
