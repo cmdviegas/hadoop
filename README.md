@@ -1,4 +1,4 @@
-## Deploying a cluster with Apache Hadoop 3.4.0
+## Deploying a cluster with Apache Hadoop 3.4.1
 
 This script deploys an Apache Hadoop cluster in fully distributed mode using Docker as the underlying infrastructure.
 

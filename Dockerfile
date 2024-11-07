@@ -78,7 +78,7 @@ ENV HADOOP_VERSION=${HADOOP_VER}
 
 RUN if [ ! -f ${MYDIR}/hadoop-${HADOOP_VERSION}.tar.gz ]; then \
     aria2c -x 16 --check-certificate=false --allow-overwrite=false \
-    https://dlcdn.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
+    https://archive.apache.org/dist/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
     fi
 RUN tar -zxf hadoop-${HADOOP_VERSION}.tar.gz -C ${MYDIR} && rm -rf hadoop-${HADOOP_VERSION}.tar.gz
 RUN ln -sf ${MYDIR}/hadoop-3* ${HADOOP_HOME}
