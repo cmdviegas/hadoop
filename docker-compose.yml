@@ -10,72 +10,55 @@
 # (C) 2022-2025 CARLOS M D VIEGAS
 # https://github.com/cmdviegas
 
-### Description:
-# This is a docker-compose file that creates a stack of nodes running Apache Hadoop 3.4.0.
+name: hadoop
 
-### How it works:
-# This compose initializes a 'master' container with Hadoop services and multiple 'worker-X' containers as worker nodes, based on the specified number of replicas. The 'master' container starts Hadoop services and forms a cluster by connecting to each 'worker-X' node. An .env file is provided to define environment variables, which the user should modify as needed.
+x-hadoop-common:
+  &hadoop-common
+  image: hadoopcluster/${IMAGE_NAME}
+  tty: true
+  restart: on-failure
+  entrypoint: ./bootstrap.sh
+  networks:
+    - hadoop_network
+  volumes:
+    - ./myfiles:/home/${CONTAINER_USERNAME}/myfiles
 
 services:
+  worker:
+    <<: *hadoop-common
+    deploy:
+      mode: replicated
+      replicas: ${NUM_WORKER_NODES}
+    command: WORKER
+    
   hadoop-master:
-    container_name: ${MASTER_HOSTNAME}
-    hostname: ${MASTER_HOSTNAME}
-    image: hadoopcluster/${IMAGE_NAME}
+    <<: *hadoop-common
+    container_name: hadoop-master
+    hostname: hadoop-master
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        USER: ${USERNAME} # USERNAME (change at .env file)
-        PASS: ${PASSWORD} # USER PASSWORD (change at .env file)
+        USER: ${CONTAINER_USERNAME} # USERNAME (change at .env file)
+        PASS: ${CONTAINER_PASSWORD} # PASSWORD (change at .env file)
         HADOOP_VER: ${HADOOP_VERSION}
-    tty: true
-    restart: no
-    networks:
-      hadoop_network:
-        ipv4_address: ${IP_MASTER}
     ports:
       - "9870:9870/tcp" # HDFS
       - "8088:8088/tcp" # YARN
-      - "2222:22/tcp" # SSH
-    volumes: 
-      - ./myfiles:/home/${USERNAME}/myfiles
-      - .env:/home/${USERNAME}/.env
-      - master:/home/${USERNAME}/
-    entrypoint: ./bootstrap.sh
+    volumes:
+      - master:/home/${CONTAINER_USERNAME}/
     command: MASTER
-    healthcheck:
-      test: bash -c 'ssh -q -o ConnectTimeout=1 ${USERNAME}@${MASTER_HOSTNAME} exit'
-      start_period: 3s
-      interval: 2s
-      timeout: 3s
-      retries: 3
-
-  worker:
-    image: hadoopcluster/${IMAGE_NAME}
-    deploy:
-      mode: replicated
-      replicas: ${REPLICAS}
-    tty: true
-    restart: on-failure:2
-    networks:
-      - hadoop_network
-    depends_on:
-      hadoop-master:
-        condition: service_healthy
-    entrypoint: ./bootstrap.sh
-    command: WORKER
-    volumes: 
-      - ./myfiles:/home/${USERNAME}/myfiles
-      - .env:/home/${USERNAME}/.env
-      - /home/${USERNAME}/
 
 networks:
   hadoop_network:
+    name: hadoop_network
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: ${IP_RANGE}
+        - subnet: 172.31.0.0/24
 
 volumes:
   master:
+    name: master_volume
+    driver: local

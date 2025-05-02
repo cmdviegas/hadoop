@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # ██████╗  ██████╗ █████╗
 # ██╔══██╗██╔════╝██╔══██╗
 # ██║  ██║██║     ███████║
@@ -11,8 +11,21 @@
 # (C) 2022-2025 CARLOS M D VIEGAS
 # https://github.com/cmdviegas
 #
-# This is a bash script to automatically download hadoop 
+# This is a bash script to automatically download Hadoop (if needed)
 #
 
-echo "Downloading Apache Hadoop 3.4.0 ..."
-wget -nc --no-check-certificate https://dlcdn.apache.org/hadoop/common/hadoop-3.4.0/hadoop-3.4.0.tar.gz
+if [ -f ${PWD}/.env ]; then
+  HADOOP_VERSION=$(grep '^HADOOP_VERSION=' "${PWD}/.env" | cut -d '=' -f2)
+else
+  echo "Error: .env file not found."
+  exit 1
+fi
+
+if [ -z "$HADOOP_VERSION" ]; then
+  echo "Error: HADOOP_VERSION must be defined in .env file."
+  exit 1
+fi
+
+echo "Downloading Apache Hadoop $HADOOP_VERSION ..."
+
+wget -nc --no-check-certificate "https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"

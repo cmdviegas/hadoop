@@ -32,7 +32,7 @@
 
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>node-master</value>
+        <value>hadoop-master</value>
         <description>The hostname of the RM.</description> 
     </property>
   
