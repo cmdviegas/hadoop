@@ -24,9 +24,6 @@ x-hadoop-common:
     - ./myfiles:/home/${CONTAINER_USERNAME}/myfiles
 
 services:
-
-
-
   worker:
     <<: *hadoop-common
     deploy:

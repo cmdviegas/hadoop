@@ -27,7 +27,6 @@ function update_xml_values() {
     sed -i "/<name>$1<\/name>/{n;s#<value>.*</value>#<value>$2</value>#;}" "$3"
 }
 
-
 # Update core-site.xml, yarn-site.xml, mapred-site.xml, hdfs-site.xml, hadoop-env.sh
 #update_xml_values "fs.defaultFS" "hdfs://${MASTER_HOSTNAME}:9000" "${HADOOP_CONF_DIR}/core-site.xml"
 update_xml_values "hadoop.http.staticuser.user" "${CONTAINER_USERNAME}" "${HADOOP_CONF_DIR}/core-site.xml"

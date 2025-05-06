@@ -12,7 +12,7 @@
 # https://github.com/cmdviegas
 #
 # This is a bash script to automatically download Hadoop (if needed)
-#
+# 
 
 if [ -f "${PWD}/.env" ]; then
   HADOOP_VERSION=$(grep '^HADOOP_VERSION=' "${PWD}/.env" | cut -d '=' -f2)

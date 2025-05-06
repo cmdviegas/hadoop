@@ -17,7 +17,7 @@
 
 ### How it works:
 # On first startup:
-# - Load .bashrc
+# - Load .bashrc 
 # - Start SSH server
 # - Format namenode HDFS (master only)
 # - Creates HDFS folders and copy files to them (master only)

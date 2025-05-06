@@ -89,3 +89,4 @@ if [ "$BOOT_STATUS" = "true" ]; then
     http://localhost:${LIGHTBLUE_COLOR}9870 \t ${YELLOW_COLOR}HDFS${RESET_COLORS}
     http://localhost:${LIGHTBLUE_COLOR}8088 \t ${YELLOW_COLOR}YARN Scheduler${RESET_COLORS}\n\n"
 fi
+ 

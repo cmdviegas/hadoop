@@ -119,7 +119,7 @@ COPY --chown=${CONTAINER_USERNAME}:${CONTAINER_USERNAME} config_files/ ${CONTAIN
 COPY --chown=${CONTAINER_USERNAME}:${CONTAINER_USERNAME} myfiles/ ${CONTAINER_WORKDIR}/myfiles
 COPY --chown=${CONTAINER_USERNAME}:${CONTAINER_USERNAME} *.sh .
 COPY --chown=${CONTAINER_USERNAME}:${CONTAINER_USERNAME} .env .
-
+ 
 # Optional (convert charset from UTF-16 to UTF-8)
 RUN dos2unix config_files/* *.sh .env
 
