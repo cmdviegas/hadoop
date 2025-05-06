@@ -37,8 +37,8 @@
 
 ###
 #### Set JAVA_HOME dynamically based on installed Java version
-JAVA_HOME_DIR=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
-sed -i "s|^export JAVA_HOME=.*|export JAVA_HOME=\"$JAVA_HOME_DIR\"|" ${HOME}/.bashrc
+#JAVA_HOME_DIR=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
+#sed -i "s|^export JAVA_HOME=.*|export JAVA_HOME=\"$JAVA_HOME_DIR\"|" ${HOME}/.bashrc
 
 ###
 #### Load .bashrc
@@ -74,7 +74,7 @@ else
     printf "I'm up and ready!\n"
 fi
 
-unset CONTAINER_USERNAME
-unset CONTAINER_PASSWORD
+unset MY_USERNAME
+unset MY_PASSWORD
 
 /bin/bash

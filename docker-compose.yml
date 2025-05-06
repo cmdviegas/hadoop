@@ -12,42 +12,42 @@
 
 name: ${STACK_NAME}
 
-x-hadoop-common:
-  &hadoop-common
-  image: hadoopcluster/${IMAGE_NAME}
+x-common:
+  &common
+  image: ${IMAGE_NAME}
   tty: true
   restart: on-failure
-  entrypoint: ./bootstrap.sh
+  entrypoint: ["./bootstrap.sh"]
   networks:
     - hadoop_network
   volumes:
-    - ./myfiles:/home/${CONTAINER_USERNAME}/myfiles
+    - ./myfiles:/home/${MY_USERNAME}/myfiles
 
 services:
   worker:
-    <<: *hadoop-common
+    <<: *common
     deploy:
       mode: replicated
       replicas: ${NUM_WORKER_NODES}
-    command: WORKER
+    command: ["WORKER"]
     
-  hadoop-master:
-    <<: *hadoop-common
+  master:
+    <<: *common
     container_name: hadoop-master
     hostname: hadoop-master
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        USER: ${CONTAINER_USERNAME} # USERNAME (change at .env file)
-        PASS: ${CONTAINER_PASSWORD} # PASSWORD (change at .env file)
-        HADOOP_VER: ${HADOOP_VERSION}
+        MY_USERNAME: ${MY_USERNAME} # USERNAME (change at .env file)
+        MY_PASSWORD: ${MY_PASSWORD} # PASSWORD (change at .env file)
+        HADOOP_VERSION: ${HADOOP_VERSION}
     ports:
       - "9870:9870/tcp" # HDFS
       - "8088:8088/tcp" # YARN
     volumes:
-      - master:/home/${CONTAINER_USERNAME}/
-    command: MASTER
+      - master:/home/${MY_USERNAME}/
+    command: ["MASTER"]
 
 networks:
   hadoop_network:

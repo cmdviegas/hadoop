@@ -18,130 +18,137 @@
 
 ###
 ##### BUILD STAGE
-FROM ubuntu:22.04 AS build
+FROM ubuntu:24.04 AS build
 
-# Bash execution
+# Use bash with pipefail to catch errors in pipelines
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Environment vars
-ARG HADOOP_VER
-ARG USER
-ARG PASS
-ARG CONTAINER_WORKDIR="/home/${USER}"
+ARG HADOOP_VERSION
+ARG MY_USERNAME
+ARG MY_PASSWORD
+ARG MY_WORKDIR="/home/${MY_USERNAME}"
 
-ENV CONTAINER_USERNAME="${USER}"
-ENV HADOOP_VERSION=${HADOOP_VER}
-ENV HADOOP_HOME="${CONTAINER_WORKDIR}/hadoop"
-
+ENV HADOOP_VERSION=${HADOOP_VERSION}
+ENV MY_USERNAME="${MY_USERNAME}"
+ENV HADOOP_HOME="${MY_WORKDIR}/hadoop"
 ENV DEBIAN_FRONTEND=noninteractive 
 
-# Set working dir
-WORKDIR ${CONTAINER_WORKDIR}
+# Set container workdir
+WORKDIR ${MY_WORKDIR}
 
-# Copy Hadoop file (if exist) to the container workdir
+# Copy hadoop file (if exist) to the container workdir
 COPY hadoop-*.tar.gz .
 
-# Extract Hadoop to the container filesystem
-RUN if [ ! -f ${CONTAINER_WORKDIR}/hadoop-${HADOOP_VERSION}.tar.gz ]; then \
+RUN \
+    # Check if hadoop exists inside workdir, if not, download it \
+    if [ ! -f ${MY_WORKDIR}/hadoop-${HADOOP_VERSION}.tar.gz ]; then \
+        # Install aria2c to download hadoop \
         apt-get update -qq && \
         apt-get install -y --no-install-recommends \
             aria2 \
         && \
+        # Clean apt cache \
         apt-get autoremove -yqq --purge && \
         apt-get clean && \
-        rm -rf /var/lib/apt/lists/* \ 
+        rm -rf /var/lib/apt/lists/* \
         && \
+        # Download hadoop according to $HADOOP_VERSION \
         aria2c -x 16 --check-certificate=false --allow-overwrite=false --quiet=true \
         https://archive.apache.org/dist/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
     fi \
     && \
-    tar -zxf hadoop-${HADOOP_VERSION}.tar.gz -C ${CONTAINER_WORKDIR} && \
+    # Extract Hadoop to the container filesystem \
+    tar -zxf hadoop-${HADOOP_VERSION}.tar.gz -C ${MY_WORKDIR} && \
     rm -rf hadoop-${HADOOP_VERSION}.tar.gz && \
-    ln -sf ${CONTAINER_WORKDIR}/hadoop-3* ${CONTAINER_WORKDIR}/hadoop
+    ln -sf ${MY_WORKDIR}/hadoop-3* ${MY_WORKDIR}/hadoop
 
 ###
 ##### FINAL IMAGE
-FROM ubuntu:22.04 AS final
+FROM ubuntu:24.04 AS final
 
-# Bash execution
+# Use bash with pipefail to catch errors in pipelines
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Environment vars
-ARG HADOOP_VER
-ARG USER
-ARG PASS
+ARG HADOOP_VERSION
+ARG MY_USERNAME
+ARG MY_PASSWORD
 
-ENV CONTAINER_USERNAME=${USER}
-ENV CONTAINER_PASSWORD=${PASS}
-ENV CONTAINER_WORKDIR="/home/${USER}"
-
-ENV HADOOP_VERSION=${HADOOP_VER}
-ENV HADOOP_HOME="${CONTAINER_WORKDIR}/hadoop"
-
+ENV MY_USERNAME=${MY_USERNAME}
+ENV MY_PASSWORD=${MY_PASSWORD}
+ENV MY_WORKDIR="/home/${MY_USERNAME}"
+ENV HADOOP_VERSION=${HADOOP_VERSION}
+ENV HADOOP_HOME="${MY_WORKDIR}/hadoop"
 ENV DEBIAN_FRONTEND=noninteractive 
 
-# Update system and install required packages
-RUN apt-get update -qq && \
+RUN \
+    # Update system and install required packages \
+    apt-get update -qq && \
     apt-get install -y --no-install-recommends \
         openjdk-11-jdk-headless \
-        python3.11-minimal \
+        python3.12-minimal \
         sudo \
         dos2unix \
         ssh \
-        wget \ 
+        wget \
         iproute2 \
         iputils-ping \
         net-tools \
     && \
+    # Clean apt cache \
     apt-get autoremove -yqq --purge && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Creates symbolic link to make 'python' and 'python3' recognized as a system command
-RUN ln -sf /usr/bin/python3.11 /usr/bin/python && \
-    ln -sf /usr/bin/python /usr/bin/python3
-
-# Creates user and add it to sudoers 
-RUN adduser --disabled-password --gecos "" ${CONTAINER_USERNAME} && \
-    echo "${CONTAINER_USERNAME}:${CONTAINER_PASSWORD}" | chpasswd && \
-    usermod -aG sudo ${CONTAINER_USERNAME} && \
-    echo "${CONTAINER_USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${CONTAINER_USERNAME}
+    rm -rf /var/lib/apt/lists/* \
+    && \
+    # Creates symbolic link to make 'python' and 'python3' recognized as a system command \
+    ln -sf /usr/bin/python3.12 /usr/bin/python && \
+    ln -sf /usr/bin/python /usr/bin/python3 \
+    && \
+    # Creates user and adds it to sudoers \
+    adduser --disabled-password --gecos "" ${MY_USERNAME} && \
+    echo "${MY_USERNAME}:${MY_PASSWORD}" | chpasswd && \
+    usermod -aG sudo ${MY_USERNAME} && \
+    echo "${MY_USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${MY_USERNAME}
 
 # Set new user
-USER ${CONTAINER_USERNAME}
-WORKDIR ${CONTAINER_WORKDIR}
+USER ${MY_USERNAME}
+WORKDIR ${MY_WORKDIR}
+
+# Copy all files from build stage to the container
+COPY --from=build --chown=${MY_USERNAME}:${MY_USERNAME} ${MY_WORKDIR}/hadoop ${HADOOP_HOME}/
 
 # Copy all files from local folder to container, except the ones in .dockerignore
-COPY --from=build --chown=${CONTAINER_USERNAME}:${CONTAINER_USERNAME} ${CONTAINER_WORKDIR}/hadoop ${HADOOP_HOME}/
+COPY --chown=${MY_USERNAME}:${MY_USERNAME} config_files/ ${MY_WORKDIR}/config_files
+COPY --chown=${MY_USERNAME}:${MY_USERNAME} bootstrap.sh config-services.sh start-services.sh .env ${MY_WORKDIR}/
 
-# Copy all files from local folder to container, except the ones in .dockerignore
-COPY --chown=${CONTAINER_USERNAME}:${CONTAINER_USERNAME} config_files/ ${CONTAINER_WORKDIR}/config_files
-COPY --chown=${CONTAINER_USERNAME}:${CONTAINER_USERNAME} myfiles/ ${CONTAINER_WORKDIR}/myfiles
-COPY --chown=${CONTAINER_USERNAME}:${CONTAINER_USERNAME} *.sh .
-COPY --chown=${CONTAINER_USERNAME}:${CONTAINER_USERNAME} .env .
- 
-# Optional (convert charset from UTF-16 to UTF-8)
-RUN dos2unix config_files/* *.sh .env
-
-# Load environment variables into .bashrc file
-RUN cat config_files/system/bash_profile >> ${CONTAINER_WORKDIR}/.bashrc && \
-    sed -i "s/^export\? HDFS_NAMENODE_USER=.*/export HDFS_NAMENODE_USER=${CONTAINER_USERNAME}/" "${CONTAINER_WORKDIR}/.bashrc"
-
-# Copy config files to Hadoop config folder
-RUN mv config_files/hadoop/* ${HADOOP_HOME}/etc/hadoop/ && \
-    chmod 0755 ${HADOOP_HOME}/etc/hadoop/*.sh 
-
-# Configure ssh for passwordless access
-RUN mkdir -p ./.ssh && \
+RUN \
+    # Convert charset from UTF-16 to UTF-8 to ensure compatibility \
+    dos2unix config_files/* *.sh .env \
+    && \
+    # Load environment variables into .bashrc file \
+    cat config_files/system/bash_profile >> ${MY_WORKDIR}/.bashrc && \
+    sed -i "s/^export\? HDFS_NAMENODE_USER=.*/export HDFS_NAMENODE_USER=${MY_USERNAME}/" "${MY_WORKDIR}/.bashrc" \
+    && \
+    # Set JAVA_HOME dynamically based on installed Java version \
+    JAVA_HOME_DIR=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")") && \
+    sed -i "s|^export JAVA_HOME=.*|export JAVA_HOME=\"$JAVA_HOME_DIR\"|" "${MY_WORKDIR}/.bashrc" \
+    && \
+    # Copy config files to Hadoop config folder \
+    mv config_files/hadoop/* ${HADOOP_HOME}/etc/hadoop/ && \
+    chmod 0755 ${HADOOP_HOME}/etc/hadoop/*.sh \
+    && \
+    # Configure ssh for passwordless access \
+    mkdir -p ./.ssh && \
     cat config_files/system/ssh_config >> .ssh/config && \
     ssh-keygen -q -N "" -t rsa -f .ssh/id_rsa && \
     cat .ssh/id_rsa.pub >> .ssh/authorized_keys && \
-    chmod 0600 .ssh/authorized_keys .ssh/config
-
-# Cleaning and permission set
-RUN rm -rf config_files/ && \
+    chmod 0600 .ssh/authorized_keys .ssh/config \
+    && \
+    # Cleaning and permission set \
+    rm -rf config_files/ && \
     sudo rm -rf /tmp/* /var/tmp/* && \
     chmod 0700 bootstrap.sh config-services.sh start-services.sh
 
-# Run 'bootstrap.sh' script on boot
-ENTRYPOINT ${CONTAINER_WORKDIR}/bootstrap.sh
+# Run 'bootstrap.sh' on startup
+ENTRYPOINT ["./bootstrap.sh"]

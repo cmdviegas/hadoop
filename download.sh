@@ -28,4 +28,4 @@ fi
 
 echo "Downloading Apache Hadoop $HADOOP_VERSION ..."
 
-wget -nc --no-check-certificate "https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"
+wget -nc --inet4-only --no-check-certificate "https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"

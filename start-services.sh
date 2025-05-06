@@ -17,7 +17,7 @@
 
 # Some coloring
 RED_COLOR=$(tput setaf 1)
-GREEN_COLOR=$(tput setaf 2) 
+GREEN_COLOR=$(tput setaf 2)
 YELLOW_COLOR=$(tput setaf 3)
 LIGHTBLUE_COLOR=$(tput setaf 6)
 RESET_COLORS=$(tput sgr0)
@@ -37,8 +37,8 @@ do
     printf "${INFO} Waiting for WORKERS to be ready${RESET_COLORS}...\n"
     WORKERS_REACHABLE=true
     # Read the file containing the IP addresses
-    while IFS= read -r ip; do
-        if ! ssh -o "ConnectTimeout=3" "$ip" exit >/dev/null 2>&1; then
+    while IFS= read -r worker; do
+        if ! ssh -o "ConnectTimeout=3" "$worker" exit >/dev/null 2>&1; then
             # If any worker node is not reachable, set WORKERS_REACHABLE to false and break the loop
             WORKERS_REACHABLE=false
             break
@@ -60,7 +60,7 @@ do
     fi
 done
 
-sleep 1
+sleep 2
 
 # Creating /user folders inside HDFS
 if ! hdfs dfs -test -d "/user/${HDFS_NAMENODE_USER}"; then
@@ -84,9 +84,8 @@ yarn node -list
 
 if [ "$BOOT_STATUS" = "true" ]; then
     printf "\n${INFO} ${GREEN_COLOR}$(tput blink)ALL SET!${RESET_COLORS}\n\n"
-    printf "TIP: To access hadoop-master, type: ${YELLOW_COLOR}docker exec -it hadoop-master bash${RESET_COLORS}\n\n"
+    printf "TIP: To access the hadoop-master, type: ${YELLOW_COLOR}docker exec -it master bash${RESET_COLORS}\n\n"
     printf "The following services are now available for access through web browser:\n
     http://localhost:${LIGHTBLUE_COLOR}9870 \t ${YELLOW_COLOR}HDFS${RESET_COLORS}
     http://localhost:${LIGHTBLUE_COLOR}8088 \t ${YELLOW_COLOR}YARN Scheduler${RESET_COLORS}\n\n"
 fi
- 
