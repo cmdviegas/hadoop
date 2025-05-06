@@ -19,16 +19,16 @@
 # On first startup:
 # - Load .bashrc
 # - Start SSH server
-# - Format namenode HDFS (spark-master only)
-# - Creates HDFS folders and copy files to them (spark-master only)
-# - Edit HADOOP/SPARK properties in .xml/.conf files according to values defined in .env
-# - Start HDFS, YARN and SPARK HISTORY SERVER
+# - Format namenode HDFS (master only)
+# - Creates HDFS folders and copy files to them (master only)
+# - Edit HADOOP properties in .xml/.conf files according to values defined in .env
+# - Start HDFS, YARN 
 
 # In the next startups:
 # - Load .bashrc
 # - Start SSH server
-# - Edit HADDOP/SPARK properties in .xml/.conf files according to values defined in .env
-# - Start HDFS, YARN and SPARK HISTORY SERVER
+# - Edit HADDOP properties in .xml/.conf files according to values defined in .env
+# - Start HDFS, YARN
 
 ###
 #### Load env variables
@@ -46,7 +46,7 @@ eval "$(tail -n +10 ${HOME}/.bashrc)" # Alternative to 'source .bashrc'
 ###
 
 ###
-#### Run script to update hadoop and spark config files
+#### Run script to update hadoop config files
 [ -f "${HOME}/config-services.sh" ] && bash -c "${HOME}/config-services.sh"
 ###
 
@@ -60,7 +60,7 @@ sudo service ssh start > /dev/null 2>&1
 # Update hadoop workers file according to the amount of worker nodes
 truncate -s 0 ${HADOOP_CONF_DIR}/workers
 for i in $(seq 1 "${NUM_WORKER_NODES}"); do
-    echo "hadoop-worker-$i" >> "${HADOOP_CONF_DIR}/workers"
+    echo "${STACK_NAME}-worker-$i" >> "${HADOOP_CONF_DIR}/workers"
 done
 ###
 
@@ -70,14 +70,11 @@ done
 if [ "$1" == "MASTER" ] ; then
     sleep 5
     [ -f "${HOME}/start-services.sh" ] && bash -c "${HOME}/start-services.sh"
-fi
-
-if [ "$1" == "WORKER" ] ; then
+else
     printf "I'm up and ready!\n"
 fi
 
 unset CONTAINER_USERNAME
 unset CONTAINER_PASSWORD
 
-# Starting bash terminal
 /bin/bash

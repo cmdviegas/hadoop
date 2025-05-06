@@ -67,9 +67,7 @@ if ! hdfs dfs -test -d "/user/${HDFS_NAMENODE_USER}"; then
     # Check if there are live datanodes in the cluster
     if hdfs dfsadmin -report | grep -q "Live datanodes"; then
         printf "${INFO} Creating folders in HDFS${RESET_COLORS}...\n"
-        hdfs dfs -mkdir -p "/user/${HDFS_NAMENODE_USER}" /spark-logs /spark-libs
-        printf "${INFO} Copying spark libs to HDFS${RESET_COLORS}...\n"
-        hdfs dfs -put "${SPARK_HOME}/jars/"*.jar /spark-libs/
+        hdfs dfs -mkdir -p "/user/${HDFS_NAMENODE_USER}"
         BOOT_STATUS=true
     else
         printf "${WARN} There are no live nodes in the cluster. Please, check config files.${RESET_COLORS}\n"
@@ -89,6 +87,5 @@ if [ "$BOOT_STATUS" = "true" ]; then
     printf "TIP: To access hadoop-master, type: ${YELLOW_COLOR}docker exec -it hadoop-master bash${RESET_COLORS}\n\n"
     printf "The following services are now available for access through web browser:\n
     http://localhost:${LIGHTBLUE_COLOR}9870 \t ${YELLOW_COLOR}HDFS${RESET_COLORS}
-    http://localhost:${LIGHTBLUE_COLOR}8088 \t ${YELLOW_COLOR}YARN Scheduler${RESET_COLORS}
-    http://localhost:${LIGHTBLUE_COLOR}18080 \t ${YELLOW_COLOR}Spark History Server${RESET_COLORS}\n\n"
+    http://localhost:${LIGHTBLUE_COLOR}8088 \t ${YELLOW_COLOR}YARN Scheduler${RESET_COLORS}\n\n"
 fi

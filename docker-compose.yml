@@ -10,7 +10,7 @@
 # (C) 2022-2025 CARLOS M D VIEGAS
 # https://github.com/cmdviegas
 
-name: hadoop
+name: ${STACK_NAME}
 
 x-hadoop-common:
   &hadoop-common
@@ -24,6 +24,9 @@ x-hadoop-common:
     - ./myfiles:/home/${CONTAINER_USERNAME}/myfiles
 
 services:
+
+
+
   worker:
     <<: *hadoop-common
     deploy:
