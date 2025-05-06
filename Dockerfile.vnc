@@ -1,0 +1,16 @@
+FROM ubuntu:22.04
+
+ENV DISPLAY=:1 \
+    DEBIAN_FRONTEND=noninteractive \
+    XDG_RUNTIME_DIR=/tmp/runtime-root
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    supervisor xvfb x11vnc novnc websockify falkon \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /tmp/runtime-root && chmod 700 /tmp/runtime-root && mkdir -p /tmp/web
+
+COPY config_files/supervisord.conf /etc/supervisord.conf
+#COPY config_files/vnc-redirect.html /tmp/web/vnc.html
+
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
