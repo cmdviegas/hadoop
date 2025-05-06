@@ -55,12 +55,12 @@ docker exec -it hadoop-master bash
 - :package: Updated `Ubuntu` version to 24.04 LTS;
 - :package: Updated `Python` version to 3.12;
 - :wrench: Minor fixes and optimizations.
-- :clipboard: Build Summary: hadoop:3.4.1 | jdk:11 | python3.12 | ubuntu24.04
+- :clipboard: Build Summary: hadoop:3.4.1 | jdk:11 | python:3.12 | ubuntu:24.04
 
 #### 02/05/2025
 - :package: Updated `Apache Hadoop` version to 3.4.1;
 - :wrench: Minor fixes and optimizations.
-- :clipboard: Build Summary: hadoop:3.4.1 | jdk:11 | python3.11 | ubuntu22.04
+- :clipboard: Build Summary: hadoop:3.4.1 | jdk:11 | python:3.11 | ubuntu:22.04
 
 
 ### :page_facing_up: License
