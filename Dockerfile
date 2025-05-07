@@ -18,7 +18,7 @@
 
 ###
 ##### BUILD STAGE
-FROM ubuntu:24.04 AS build
+FROM ubuntu:24.04 AS build-hadoop
 
 # Use bash with pipefail to catch errors in pipelines
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -116,7 +116,7 @@ USER ${MY_USERNAME}
 WORKDIR ${MY_WORKDIR}
 
 # Copy all files from build stage to the container
-COPY --from=build --chown=${MY_USERNAME}:${MY_USERNAME} ${MY_WORKDIR}/hadoop ${HADOOP_HOME}/
+COPY --from=build-hadoop --chown=${MY_USERNAME}:${MY_USERNAME} ${MY_WORKDIR}/hadoop ${HADOOP_HOME}/
 
 # Copy all files from local folder to container, except the ones in .dockerignore
 COPY --chown=${MY_USERNAME}:${MY_USERNAME} config_files/ ${MY_WORKDIR}/config_files
