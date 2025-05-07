@@ -29,8 +29,8 @@ ARG MY_USERNAME
 ARG MY_PASSWORD
 ARG MY_WORKDIR="/home/${MY_USERNAME}"
 
-ENV HADOOP_VERSION=${HADOOP_VERSION}
 ENV MY_USERNAME="${MY_USERNAME}"
+ENV HADOOP_VERSION="${HADOOP_VERSION}"
 ENV HADOOP_HOME="${MY_WORKDIR}/hadoop"
 ENV DEBIAN_FRONTEND=noninteractive 
 
@@ -54,7 +54,7 @@ RUN \
         rm -rf /var/lib/apt/lists/* \
         && \
         # Download hadoop according to $HADOOP_VERSION \
-        aria2c -x 16 --check-certificate=false --allow-overwrite=false --quiet=true \
+        aria2c --disable-ipv6 -x 16 --check-certificate=false --allow-overwrite=false --quiet=true \
         https://archive.apache.org/dist/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
     fi \
     && \
@@ -75,10 +75,10 @@ ARG HADOOP_VERSION
 ARG MY_USERNAME
 ARG MY_PASSWORD
 
-ENV MY_USERNAME=${MY_USERNAME}
-ENV MY_PASSWORD=${MY_PASSWORD}
+ENV MY_USERNAME="${MY_USERNAME}"
+ENV MY_PASSWORD="${MY_PASSWORD}"
 ENV MY_WORKDIR="/home/${MY_USERNAME}"
-ENV HADOOP_VERSION=${HADOOP_VERSION}
+ENV HADOOP_VERSION="${HADOOP_VERSION}"
 ENV HADOOP_HOME="${MY_WORKDIR}/hadoop"
 ENV DEBIAN_FRONTEND=noninteractive 
 
