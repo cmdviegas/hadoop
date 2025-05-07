@@ -42,7 +42,7 @@ COPY hadoop-*.tar.gz .
 
 RUN \
     # Check if hadoop exists inside workdir, if not, download it \
-    if [ ! -f ${MY_WORKDIR}/hadoop-${HADOOP_VERSION}.tar.gz ]; then \
+    if [ ! -f "${MY_WORKDIR}/hadoop-${HADOOP_VERSION}.tar.gz" ]; then \
         # Install aria2c to download hadoop \
         apt-get update -qq && \
         apt-get install -y --no-install-recommends \
