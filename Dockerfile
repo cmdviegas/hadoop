@@ -98,6 +98,9 @@ RUN \
         iproute2 \
         iputils-ping \
         net-tools \
+        ca-certificates \
+    && \
+    update-ca-certificates \
     && \
     # Clean apt cache \
     apt-get autoremove -yqq --purge && \
