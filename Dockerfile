@@ -47,6 +47,9 @@ RUN \
         apt-get update -qq && \
         apt-get install -y --no-install-recommends \
             aria2 \
+            ca-certificates \
+        && \
+        update-ca-certificates \
         && \
         # Clean apt cache \
         apt-get autoremove -yqq --purge && \
@@ -54,7 +57,7 @@ RUN \
         rm -rf /var/lib/apt/lists/* \
         && \
         # Download hadoop \
-        aria2c --disable-ipv6 -x 16 --check-certificate=false --allow-overwrite=false \
+        aria2c --disable-ipv6 -x 16 --allow-overwrite=false \
         https://archive.apache.org/dist/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
     fi \
     && \
