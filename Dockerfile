@@ -53,15 +53,15 @@ RUN \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* \
         && \
-        # Download hadoop according to $HADOOP_VERSION \
-        aria2c --disable-ipv6 -x 16 --check-certificate=false --allow-overwrite=false --quiet=true \
+        # Download hadoop \
+        aria2c --disable-ipv6 -x 16 --check-certificate=false --allow-overwrite=false \
         https://archive.apache.org/dist/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
     fi \
     && \
     # Extract Hadoop to the container filesystem \
     tar -zxf hadoop-${HADOOP_VERSION}.tar.gz -C ${MY_WORKDIR} && \
     rm -rf hadoop-${HADOOP_VERSION}.tar.gz && \
-    ln -sf ${MY_WORKDIR}/hadoop-3* ${MY_WORKDIR}/hadoop
+    ln -sf ${MY_WORKDIR}/hadoop-3* ${HADOOP_HOME}
 
 ###
 ##### FINAL IMAGE
@@ -124,10 +124,10 @@ COPY --chown=${MY_USERNAME}:${MY_USERNAME} bootstrap.sh config-services.sh start
 
 RUN \
     # Convert charset from UTF-16 to UTF-8 to ensure compatibility \
-    dos2unix config_files/* *.sh .env \
+    dos2unix -q -k ${MY_WORKDIR}/config_files/* *.sh .env \
     && \
     # Load environment variables into .bashrc file \
-    cat config_files/system/bash_profile >> ${MY_WORKDIR}/.bashrc && \
+    cat "${MY_WORKDIR}/config_files/system/bash_profile" >> "${MY_WORKDIR}/.bashrc" && \
     sed -i "s/^export\? HDFS_NAMENODE_USER=.*/export HDFS_NAMENODE_USER=${MY_USERNAME}/" "${MY_WORKDIR}/.bashrc" \
     && \
     # Set JAVA_HOME dynamically based on installed Java version \
@@ -135,18 +135,18 @@ RUN \
     sed -i "s|^export JAVA_HOME=.*|export JAVA_HOME=\"$JAVA_HOME_DIR\"|" "${MY_WORKDIR}/.bashrc" \
     && \
     # Copy config files to Hadoop config folder \
-    mv config_files/hadoop/* ${HADOOP_HOME}/etc/hadoop/ && \
+    mv ${MY_WORKDIR}/config_files/hadoop/* ${HADOOP_HOME}/etc/hadoop/ && \
     chmod 0755 ${HADOOP_HOME}/etc/hadoop/*.sh \
     && \
     # Configure ssh for passwordless access \
     mkdir -p ./.ssh && \
-    cat config_files/system/ssh_config >> .ssh/config && \
+    cat ${MY_WORKDIR}/config_files/system/ssh_config >> .ssh/config && \
     ssh-keygen -q -N "" -t rsa -f .ssh/id_rsa && \
     cat .ssh/id_rsa.pub >> .ssh/authorized_keys && \
     chmod 0600 .ssh/authorized_keys .ssh/config \
     && \
     # Cleaning and permission set \
-    rm -rf config_files/ && \
+    rm -rf ${MY_WORKDIR}/config_files/ && \
     sudo rm -rf /tmp/* /var/tmp/* && \
     chmod 0700 bootstrap.sh config-services.sh start-services.sh
 
