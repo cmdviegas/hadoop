@@ -26,8 +26,10 @@ WARN="[${RED_COLOR}ERROR${RESET_COLORS}]${YELLOW_COLOR}"
 BOOT_STATUS=false
 
 # Format HDFS
-printf "${INFO} Formatting filesystem${RESET_COLORS}...\n"
-HADOOP_ROOT_LOGGER=ERROR,console hdfs namenode -format -nonInteractive
+if [ ! -d "$(grep -A2 '<name>dfs.namenode.name.dir</name>' "${HADOOP_CONF_DIR}/hdfs-site.xml" | grep '<value>' | sed -E 's/.*<value>(.*)<\/value>.*/\1/')/current" ]; then
+    printf "${INFO} Formatting filesystem${RESET_COLORS}...\n"
+    HADOOP_ROOT_LOGGER=ERROR,console hdfs namenode -format -nonInteractive
+fi
 
 # Start HDFS and YARN services
 # Test if all workers are alive and ready to create the cluster
