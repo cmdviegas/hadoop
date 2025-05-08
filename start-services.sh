@@ -84,7 +84,7 @@ yarn node -list
 
 if [ "$BOOT_STATUS" = "true" ]; then
     printf "\n${INFO} ${GREEN_COLOR}$(tput blink)ALL SET!${RESET_COLORS}\n\n"
-    printf "TIP: To access the hadoop-master, type: ${YELLOW_COLOR}docker exec -it master bash${RESET_COLORS}\n\n"
+    printf "TIP: To access the hadoop-master, type: ${YELLOW_COLOR}docker exec -it hadoop-master bash${RESET_COLORS}\n\n"
     printf "The following services are now available for access through web browser:\n
     http://localhost:${LIGHTBLUE_COLOR}9870 \t ${YELLOW_COLOR}HDFS${RESET_COLORS}
     http://localhost:${LIGHTBLUE_COLOR}8088 \t ${YELLOW_COLOR}YARN Scheduler${RESET_COLORS}\n\n"
