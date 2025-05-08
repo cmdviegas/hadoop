@@ -20,8 +20,6 @@ x-common:
   entrypoint: ["./bootstrap.sh"]
   networks:
     - hadoop_network
-  volumes:
-    - ./myfiles:/home/${MY_USERNAME}/myfiles
 
 services:
   worker:
@@ -29,6 +27,8 @@ services:
     deploy:
       mode: replicated
       replicas: ${NUM_WORKER_NODES}
+    volumes:
+      - ./myfiles:/home/${MY_USERNAME}/myfiles
     command: ["WORKER"]
     
   master:
@@ -47,6 +47,7 @@ services:
       - "8088:8088/tcp" # YARN
     volumes:
       - master:/home/${MY_USERNAME}/
+      - ./myfiles:/home/${MY_USERNAME}/myfiles
     command: ["MASTER"]
 
 networks:
