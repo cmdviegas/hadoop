@@ -50,7 +50,7 @@ do
         sleep 1
         start-dfs.sh && start-yarn.sh
         sleep 1
-        mr-jobhistory-daemon.sh start historyserver
+        mapred --daemon start historyserver
         break
     fi
     # Wait before checking again
