@@ -52,7 +52,7 @@ docker exec -it hadoop-master bash
 ### :memo: Changelog
 
 #### 08/05/2025
-- :wrench: Added `MapReduce Job History`;
+- :sparkles: Added `MapReduce Job History`;
 - :wrench: Minor fixes and optimizations.
 - :clipboard: Build Summary: hadoop:3.4.1 | jdk:11 | python:3.12 | ubuntu:24.04
 
