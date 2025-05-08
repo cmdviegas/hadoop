@@ -20,6 +20,7 @@ The cluster uses **YARN** for resource scheduling and **HDFS** for distributed f
 - **Exposed Ports**:
   - `9870` – HDFS Web UI
   - `8088` – YARN ResourceManager UI
+  - `19888` – MAPRED Job History UI
 
 #### Worker Nodes (`hadoop-worker-<id>`)
 
