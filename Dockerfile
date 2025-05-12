@@ -24,15 +24,15 @@ FROM ubuntu:24.04 AS build-hadoop
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Environment vars
-ARG HADOOP_VERSION
-ARG MY_USERNAME
-ARG MY_PASSWORD
-ARG MY_WORKDIR="/home/${MY_USERNAME}"
+ARG HADOOP_VERSION \
+    MY_USERNAME \
+    MY_PASSWORD \
+    MY_WORKDIR="/home/${MY_USERNAME}"
 
-ENV MY_USERNAME="${MY_USERNAME}"
-ENV HADOOP_VERSION="${HADOOP_VERSION}"
-ENV HADOOP_HOME="${MY_WORKDIR}/hadoop"
-ENV DEBIAN_FRONTEND=noninteractive 
+ENV MY_USERNAME="${MY_USERNAME}" \
+    HADOOP_VERSION="${HADOOP_VERSION}" \
+    HADOOP_HOME="${MY_WORKDIR}/hadoop" \
+    DEBIAN_FRONTEND=noninteractive
 
 # Set container workdir
 WORKDIR ${MY_WORKDIR}
@@ -74,16 +74,16 @@ FROM ubuntu:24.04 AS final
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Environment vars
-ARG HADOOP_VERSION
-ARG MY_USERNAME
-ARG MY_PASSWORD
+ARG HADOOP_VERSION \
+    MY_USERNAME \
+    MY_PASSWORD
 
-ENV MY_USERNAME="${MY_USERNAME}"
-ENV MY_PASSWORD="${MY_PASSWORD}"
-ENV MY_WORKDIR="/home/${MY_USERNAME}"
-ENV HADOOP_VERSION="${HADOOP_VERSION}"
-ENV HADOOP_HOME="${MY_WORKDIR}/hadoop"
-ENV DEBIAN_FRONTEND=noninteractive 
+ENV MY_USERNAME="${MY_USERNAME}" \
+    MY_PASSWORD="${MY_PASSWORD}" \
+    MY_WORKDIR="/home/${MY_USERNAME}" \
+    HADOOP_VERSION="${HADOOP_VERSION}" \
+    HADOOP_HOME="${MY_WORKDIR}/hadoop" \
+    DEBIAN_FRONTEND=noninteractive
 
 RUN \
     # Update system and install required packages \
@@ -93,6 +93,7 @@ RUN \
         python3.12-minimal \
         sudo \
         dos2unix \
+        nano \
         ssh \
         wget \
         iproute2 \
