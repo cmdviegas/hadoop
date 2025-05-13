@@ -113,6 +113,8 @@ RUN \
     ln -sf /usr/bin/python3.12 /usr/bin/python && \
     ln -sf /usr/bin/python /usr/bin/python3 \
     && \
+    userdel --remove ubuntu || true \
+    && \
     # Creates user and adds it to sudoers \
     adduser --disabled-password --gecos "" ${MY_USERNAME} && \
     echo "${MY_USERNAME}:${MY_PASSWORD}" | chpasswd && \

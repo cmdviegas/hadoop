@@ -29,6 +29,7 @@ services:
       replicas: ${NUM_WORKER_NODES}
     volumes:
       - ./myfiles:/home/${MY_USERNAME}/myfiles
+      - .env:/home/${MY_USERNAME}/.env
     command: ["WORKER"]
     
   master:
@@ -49,6 +50,7 @@ services:
     volumes:
       - master:/home/${MY_USERNAME}/
       - ./myfiles:/home/${MY_USERNAME}/myfiles
+      - .env:/home/${MY_USERNAME}/.env
     command: ["MASTER"]
 
 networks:
@@ -58,9 +60,9 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.31.0.0/24
+        - subnet: 172.30.0.0/24
 
 volumes:
   master:
-    name: master_volume
+    name: ${STACK_NAME}_master_volume
     driver: local
