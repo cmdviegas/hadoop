@@ -20,6 +20,8 @@
 [ -f "${HOME}/.env" ] && . "${HOME}/.env"
 ###
 
+MASTER_HOSTNAME="${STACK_NAME}-master"
+
 ###
 #### Hadoop properties
 # Functions to update hadoop properties dynamically according vars in .env file.
@@ -28,9 +30,9 @@ function update_xml_values() {
 }
 
 # Update core-site.xml, yarn-site.xml, mapred-site.xml, hdfs-site.xml, hadoop-env.sh
-#update_xml_values "fs.defaultFS" "hdfs://${MASTER_HOSTNAME}:9000" "${HADOOP_CONF_DIR}/core-site.xml"
+update_xml_values "fs.defaultFS" "hdfs://${MASTER_HOSTNAME}:9000" "${HADOOP_CONF_DIR}/core-site.xml"
 update_xml_values "hadoop.http.staticuser.user" "${USER}" "${HADOOP_CONF_DIR}/core-site.xml"
-#update_xml_values "yarn.resourcemanager.hostname" "${MASTER_HOSTNAME}" "${HADOOP_CONF_DIR}/yarn-site.xml"
+update_xml_values "yarn.resourcemanager.hostname" "${MASTER_HOSTNAME}" "${HADOOP_CONF_DIR}/yarn-site.xml"
 update_xml_values "yarn.nodemanager.resource.memory-mb" "${YARN_NODEMANAGER_RESOURCE_MEMORY_MB}" "${HADOOP_CONF_DIR}/yarn-site.xml"
 update_xml_values "yarn.scheduler.maximum-allocation-mb" "${YARN_SCHEDULER_MAXIMUM_ALLOCATION_MB}" "${HADOOP_CONF_DIR}/yarn-site.xml"
 update_xml_values "yarn.scheduler.minimum-allocation-mb" "${YARN_SCHEDULER_MINIMUM_ALLOCATION_MB}" "${HADOOP_CONF_DIR}/yarn-site.xml"

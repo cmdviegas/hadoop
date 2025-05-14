@@ -50,8 +50,6 @@ RUN \
             aria2 \
             ca-certificates \
         && \
-        update-ca-certificates \
-        && \
         # Clean apt cache \
         apt-get autoremove -yqq --purge && \
         apt-get clean && \
@@ -93,16 +91,14 @@ RUN \
         openjdk-11-jdk-headless \
         python3.12-minimal \
         sudo \
-        dos2unix \
         nano \
+        dos2unix \
         ssh \
         wget \
         iproute2 \
         iputils-ping \
         net-tools \
         ca-certificates \
-    && \
-    update-ca-certificates \
     && \
     # Clean apt cache \
     apt-get autoremove -yqq --purge && \
